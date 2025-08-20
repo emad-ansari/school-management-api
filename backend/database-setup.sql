@@ -1,6 +1,6 @@
--- Create the schools table
+-- Create the schools table for PostgreSQL
 CREATE TABLE IF NOT EXISTS schools (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
   address TEXT NOT NULL,
   latitude DECIMAL(10, 8) NOT NULL,

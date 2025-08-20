@@ -21,29 +21,34 @@ app.use(cors());
 app.use(express.json());
 
 // Basic route for testing
-// app.get("/", (req, res) => {
-// 	res.json({ message: "School API is working!" });
-// });
+app.get("/", (req, res) => {
+	res.json({ 
+		message: "School API is working!", 
+		environment: process.env.NODE_ENV || 'development',
+		database: process.env.DB_HOST ? 'configured' : 'not configured'
+	});
+});
 
 // School routes
 app.use("/", schoolRoutes);
 
 async function startServer() {
 	try {
-		// Test database connection
-		db.getConnection((err, connection) => {
+		// Test database connection but don't crash if it fails
+		db.connect((err, client, release) => {
 			if (err) {
 				console.error("❌ Database connection failed:", err.message);
-				console.error("Please check your database configuration and ensure MySQL is running");
-				process.exit(1);
+				console.error("⚠️  Server will start but database operations will fail");
+				console.error("Please configure your database connection for production");
+			} else {
+				console.log("✅ Connected to PostgreSQL successfully!");
+				release();
 			}
-			console.log("✅ Connected to MySQL as id " + connection.threadId);
-			connection.release();
 		});
 
 		app.listen(PORT, () => {
 			console.log(`🚀 Server running on http://localhost:${PORT}`);
-			console.log(`📚 API endpoints available at http://localhost:${PORT}/api`);
+			console.log(`📚 API endpoints available at http://localhost:${PORT}`);
 		});
 
 	} catch (err) {

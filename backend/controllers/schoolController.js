@@ -1,7 +1,7 @@
-const db = require("../config/database"); // Import the database pool
+const db = require("../config/database"); // Import the PostgreSQL pool
 const { calculateDistance } = require("./distanceController");
 
-// Add a new school (using async/await with promise pool)
+// Add a new school (using async/await with PostgreSQL)
 const addSchool = async (req, res) => {
 	try {
 		const { name, address, latitude, longitude } = req.body;
@@ -30,10 +30,10 @@ const addSchool = async (req, res) => {
 		}
 
 		const query =
-			"INSERT INTO schools (name, address, latitude, longitude) VALUES (?, ?, ?, ?)";
+			"INSERT INTO schools (name, address, latitude, longitude) VALUES ($1, $2, $3, $4) RETURNING id";
 
-		// Use promise pool with async/await
-		const [result] = await db.promise().execute(query, [
+		// Use PostgreSQL with async/await
+		const result = await db.query(query, [
 			name,
 			address,
 			parseFloat(latitude),
@@ -42,7 +42,7 @@ const addSchool = async (req, res) => {
 
 		res.status(201).json({
 			message: "School added successfully",
-			schoolId: result.insertId,
+			schoolId: result.rows[0].id,
 		});
 	} catch (error) {
 		console.error("Database error in addSchool:", error);
@@ -79,11 +79,11 @@ const listSchools = async (req, res) => {
 
 		const query = "SELECT * FROM schools";
 
-		// Use promise pool with async/await
-		const [results] = await db.promise().execute(query);
+		// Use PostgreSQL with async/await
+		const result = await db.query(query);
 
 		// Calculate distance for each school and add it to the result
-		const schoolsWithDistance = results.map((school) => {
+		const schoolsWithDistance = result.rows.map((school) => {
 			const distance = calculateDistance(
 				userLat,
 				userLon,

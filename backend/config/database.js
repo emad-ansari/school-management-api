@@ -1,38 +1,40 @@
-const mysql = require('mysql2');
+const { Pool } = require('pg');
+
+// Only load .env in development
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
 
-
-// Create connection pool
-const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'school_management',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-  // SSL for production
+// Create PostgreSQL connection pool for NeonDB
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL || process.env.NEON_DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' 
     ? { rejectUnauthorized: false } 
-    : false
+    : false,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
 });
 
-// Get a promise-based interface
-const promisePool = pool.promise();
-
 // Test connection
-pool.getConnection((err, connection) => {
+pool.connect((err, client, release) => {
   if (err) {
-    console.error('❌ Error connecting to MySQL:', err.message);
-    console.error('Please check your database configuration in .env file');
+    console.error('❌ Error connecting to PostgreSQL:', err.message);
+    console.error('Database configuration:');
+    console.error('- DATABASE_URL:', process.env.DATABASE_URL ? 'configured' : 'not configured');
+    console.error('- NEON_DATABASE_URL:', process.env.NEON_DATABASE_URL ? 'configured' : 'not configured');
+    console.error('- Environment:', process.env.NODE_ENV || 'development');
+    
+    if (process.env.NODE_ENV === 'production') {
+      console.error('For NeonDB deployment, make sure you have:');
+      console.error('1. Created a NeonDB database at https://neon.tech');
+      console.error('2. Set the DATABASE_URL environment variable in Render');
+      console.error('3. The DATABASE_URL should look like: postgresql://user:password@host/database');
+    }
   } else {
-    console.log('✅ Connected to MySQL successfully!');
-    connection.release(); // Release the connection back to the pool
+    console.log('✅ Connected to PostgreSQL successfully!');
+    release();
   }
 });
 
-// Export both pool and promisePool for flexibility
 module.exports = pool;
-module.exports.promise = promisePool;
