@@ -1,10 +1,10 @@
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = 'https://school-management-api-0dyr.onrender.com/';
 
 export const apiService = {
   // Add a new school
   async addSchool(schoolData) {
     try {
-      const response = await fetch(`${API_BASE_URL}/addSchool`, {
+      const response = await fetch(`${API_BASE_URL}/api/addSchool`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -32,7 +32,7 @@ export const apiService = {
   async getSchoolsByProximity(latitude, longitude) {
     try {
       const response = await fetch(
-        `${API_BASE_URL}/listSchools?latitude=${latitude}&longitude=${longitude}`,
+        `${API_BASE_URL}/api/listSchools?latitude=${latitude}&longitude=${longitude}`,
         {
           method: 'GET',
           headers: {
