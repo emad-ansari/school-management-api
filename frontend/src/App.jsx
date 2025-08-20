@@ -2,6 +2,7 @@ import "./App.css";
 import { GraduationCap, MapPin } from "lucide-react";
 import { AddSchoolForm } from "./components/add-school-form";
 import { ProximitySearchForm } from "./components/proximity-search-form";
+import { ApiStatus } from "./components/api-status";
 import {
 	Card,
 	CardContent,
@@ -24,6 +25,9 @@ function App() {
 						<h1 className="text-4xl font-bold text-foreground">
 							School Management API
 						</h1>
+					</div>
+					<div className="flex items-center justify-center gap-4 mb-4">
+						<ApiStatus />
 					</div>
 					<p className="text-lg text-muted-foreground max-w-2xl mx-auto">
 						Welcome to the School Management API. Use the forms

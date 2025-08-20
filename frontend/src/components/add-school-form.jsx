@@ -3,10 +3,12 @@ import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { Label } from "./ui/label"
 import { Textarea } from "./ui/textarea"
-import { Plus, Loader2 } from "lucide-react"
+import { Plus, Loader2, CheckCircle, AlertCircle } from "lucide-react"
+import { apiService } from "../services/api"
 
 export function AddSchoolForm() {
   const [isLoading, setIsLoading] = useState(false)
+  const [message, setMessage] = useState({ type: '', text: '' })
   const [formData, setFormData] = useState({
     schoolName: "",
     address: "",
@@ -17,20 +19,24 @@ export function AddSchoolForm() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsLoading(true)
+    setMessage({ type: '', text: '' })
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    console.log("Adding school:", formData)
-    setIsLoading(false)
-
-    // Reset form
-    setFormData({
-      schoolName: "",
-      address: "",
-      latitude: "",
-      longitude: "",
-    })
+    try {
+      const result = await apiService.addSchool(formData)
+      setMessage({ type: 'success', text: `School "${formData.schoolName}" added successfully!` })
+      
+      // Reset form
+      setFormData({
+        schoolName: "",
+        address: "",
+        latitude: "",
+        longitude: "",
+      })
+    } catch (error) {
+      setMessage({ type: 'error', text: error.message || 'Failed to add school' })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleInputChange = (field, value) => {
@@ -119,6 +125,22 @@ export function AddSchoolForm() {
           </>
         )}
       </Button>
+
+      {/* Message Display */}
+      {message.text && (
+        <div className={`mt-4 p-3 rounded-lg flex items-center gap-2 ${
+          message.type === 'success' 
+            ? 'bg-green-50 border border-green-200 text-green-800' 
+            : 'bg-red-50 border border-red-200 text-red-800'
+        }`}>
+          {message.type === 'success' ? (
+            <CheckCircle className="h-4 w-4" />
+          ) : (
+            <AlertCircle className="h-4 w-4" />
+          )}
+          <span className="text-sm font-medium">{message.text}</span>
+        </div>
+      )}
     </form>
   )
 }
