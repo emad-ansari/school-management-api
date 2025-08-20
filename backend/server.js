@@ -5,9 +5,17 @@ const cors = require("cors");
 const schoolRoutes = require("./routes/schoolRoute");
 const db = require("./config/database.js");
 
+
+
+if (process.env.NODE_ENV !== 'production') {
+	require('dotenv').config();
+	console.log('Development environment - loaded .env file');
+} else {
+	console.log('Production environment - using Render environment variables');
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
-
 // Middleware
 app.use(cors());
 app.use(express.json());

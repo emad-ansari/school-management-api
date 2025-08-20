@@ -1,5 +1,8 @@
 const mysql = require('mysql2');
-require('dotenv').config();
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
+
 
 // Create connection pool
 const pool = mysql.createPool({
