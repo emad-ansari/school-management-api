@@ -1,11 +1,10 @@
-const db = require('../config/database');
+const { promisePool } = require('../config/database'); // Import the promise pool
 const { calculateDistance } = require('./distanceController');
 
-// Add a new school
-const addSchool = (req, res) => {
+// Add a new school (using async/await with promise pool)
+const addSchool = async (req, res) => {
   try {
     const { name, address, latitude, longitude } = req.body;
-    console.log('name:',  name)
     
     // Validation
     if (!name || !address || !latitude || !longitude) {
@@ -26,25 +25,26 @@ const addSchool = (req, res) => {
     
     const query = 'INSERT INTO schools (name, address, latitude, longitude) VALUES (?, ?, ?, ?)';
     
-    db.query(query, [name, address, parseFloat(latitude), parseFloat(longitude)], (err, result) => {
-      if (err) {
-        console.error('Database error:', err);
-        return res.status(500).json({ error: 'Failed to add school' });
-      }
-      
-      res.status(201).json({ 
-        message: 'School added successfully', 
-        schoolId: result.insertId 
-      });
+    // Use promise pool with async/await
+    const [result] = await promisePool.execute(query, [
+      name, 
+      address, 
+      parseFloat(latitude), 
+      parseFloat(longitude)
+    ]);
+    
+    res.status(201).json({ 
+      message: 'School added successfully', 
+      schoolId: result.insertId 
     });
   } catch (error) {
-    console.error('Unexpected error in addSchool:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Database error in addSchool:', error);
+    res.status(500).json({ error: 'Failed to add school' });
   }
 };
 
 // Get all schools sorted by distance
-const listSchools = (req, res) => {
+const listSchools = async (req, res) => {
   try {
     const userLat = parseFloat(req.query.latitude);
     const userLon = parseFloat(req.query.longitude);
@@ -64,40 +64,36 @@ const listSchools = (req, res) => {
     
     const query = 'SELECT * FROM schools';
     
-    db.query(query, (err, results) => {
-      if (err) {
-        console.error('Database error:', err);
-        return res.status(500).json({ error: 'Failed to fetch schools' });
-      }
+    // Use promise pool with async/await
+    const [results] = await promisePool.execute(query);
+    
+    // Calculate distance for each school and add it to the result
+    const schoolsWithDistance = results.map(school => {
+      const distance = calculateDistance(
+        userLat, userLon, 
+        school.latitude, school.longitude
+      );
       
-      // Calculate distance for each school and add it to the result
-      const schoolsWithDistance = results.map(school => {
-        const distance = calculateDistance(
-          userLat, userLon, 
-          school.latitude, school.longitude
-        );
-        
-        return {
-          id: school.id,
-          name: school.name,
-          address: school.address,
-          latitude: school.latitude,
-          longitude: school.longitude,
-          distance: Math.round(distance * 100) / 100 // Round to 2 decimal places
-        };
-      });
-      
-      // Sort by distance (closest first)
-      schoolsWithDistance.sort((a, b) => a.distance - b.distance);
-      
-      res.json({
-        userLocation: { latitude: userLat, longitude: userLon },
-        schools: schoolsWithDistance
-      });
+      return {
+        id: school.id,
+        name: school.name,
+        address: school.address,
+        latitude: school.latitude,
+        longitude: school.longitude,
+        distance: Math.round(distance * 100) / 100 // Round to 2 decimal places
+      };
+    });
+    
+    // Sort by distance (closest first)
+    schoolsWithDistance.sort((a, b) => a.distance - b.distance);
+    
+    res.json({
+      userLocation: { latitude: userLat, longitude: userLon },
+      schools: schoolsWithDistance
     });
   } catch (error) {
-    console.error('Unexpected error in listSchools:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Database error in listSchools:', error);
+    res.status(500).json({ error: 'Failed to fetch schools' });
   }
 };
 
