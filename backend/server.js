@@ -13,12 +13,12 @@ app.use(cors());
 app.use(express.json());
 
 // Basic route for testing
-app.get("/", (req, res) => {
-	res.json({ message: "School API is working!" });
-});
+// app.get("/", (req, res) => {
+// 	res.json({ message: "School API is working!" });
+// });
 
 // School routes
-app.use("/api", schoolRoutes);
+app.use("/", schoolRoutes);
 
 async function startServer() {
 	try {
