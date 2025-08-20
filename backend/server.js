@@ -3,44 +3,53 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const schoolRoutes = require("./routes/schoolRoute");
-const connection = require("./config/database.js");
+const db = require("./config/database.js");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Middleware
 app.use(cors());
-
 app.use(express.json());
-
-// Routes
-app.use("/", schoolRoutes);
 
 // Basic route for testing
 app.get("/", (req, res) => {
-	res.json({ message: "School API is working working working" });
+	res.json({ message: "School API is working!" });
 });
+
+// School routes
+app.use("/api", schoolRoutes);
 
 async function startServer() {
 	try {
-		connection.connect((err) => {
+		// Test database connection
+		db.getConnection((err, connection) => {
 			if (err) {
-				console.error("Error connecting to MySQL: " + err.stack);
-				return;
+				console.error("❌ Database connection failed:", err.message);
+				console.error("Please check your database configuration and ensure MySQL is running");
+				process.exit(1);
 			}
-			console.log("Connected to MySQL as id " + connection.threadId);
+			console.log("✅ Connected to MySQL as id " + connection.threadId);
+			connection.release();
 		});
 
 		app.listen(PORT, () => {
 			console.log(`🚀 Server running on http://localhost:${PORT}`);
+			console.log(`📚 API endpoints available at http://localhost:${PORT}/api`);
 		});
 
-		// gracefulShutdown(); // handle SIGINT
 	} catch (err) {
-		console.error("❌ Database connection failed:", err);
+		console.error("❌ Server startup failed:", err);
 		process.exit(1);
 	}
 }
 
+// Graceful shutdown
+process.on('SIGINT', () => {
+	console.log('\n🛑 Shutting down server gracefully...');
+	process.exit(0);
+});
+
 startServer();
 
-module.exports = connection;
+module.exports = app;
