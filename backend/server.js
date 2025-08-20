@@ -17,7 +17,7 @@ app.use("/", schoolRoutes);
 
 // Basic route for testing
 app.get("/", (req, res) => {
-	res.json({ message: "School API is working!" });
+	res.json({ message: "School API is working working working" });
 });
 
 async function startServer() {
