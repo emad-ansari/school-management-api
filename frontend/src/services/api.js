@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:3000/';
+const API_BASE_URL = 'https://school-management-api-0dyr.onrender.com/';
 
 export const apiService = {
   // Add a new school
