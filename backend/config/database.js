@@ -5,9 +5,18 @@ if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
 }
 
+// Debug: Show connection string (masked for security)
+const connectionString = process.env.DATABASE_URL || process.env.NEON_DATABASE_URL;
+if (connectionString) {
+  const maskedString = connectionString.replace(/\/\/[^:]+:[^@]+@/, '//***:***@');
+  console.log('🔍 Using connection string:', maskedString);
+} else {
+  console.log('❌ No DATABASE_URL or NEON_DATABASE_URL found');
+}
+
 // Create PostgreSQL connection pool for NeonDB
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || process.env.NEON_DATABASE_URL,
+  connectionString: connectionString,
   ssl: process.env.NODE_ENV === 'production' 
     ? { rejectUnauthorized: false } 
     : false,
