@@ -74,8 +74,8 @@ const listSchools = async (req, res) => {
         id: school.id,
         name: school.name,
         address: school.address,
-        latitude: school.latitude,
-        longitude: school.longitude,
+        latitude: parseFloat(school.latitude),
+        longitude: parseFloat(school.longitude),
         created_at: school.created_at,
         distance: Math.round(distance * 100) / 100 // Round to 2 decimal places
       };
@@ -97,4 +97,4 @@ const listSchools = async (req, res) => {
 
 
 
-module.exports = { addSchool, listSchools, getAllSchools };
+module.exports = { addSchool, listSchools };
