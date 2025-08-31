@@ -43,6 +43,7 @@ export function AddSchoolForm() {
 		state: "",
 		city: "",
 		email: "",
+		contact: "",
 		pictureUrl: null,
 	});
 
@@ -304,6 +305,25 @@ export function AddSchoolForm() {
 					value={formData.email}
 					onChange={(e) =>
 						handleInputChange("email", e.target.value)
+					}
+					className="bg-input border-border focus:ring-2 focus:ring-ring focus:border-transparent"
+					required
+				/>
+			</div>
+			<div className="space-y-2">
+				<Label
+					htmlFor="contact"
+					className="text-sm font-medium text-foreground"
+				>
+					Contact
+				</Label>
+				<Input
+					id="contact"
+					type="text"
+					placeholder="+91-393403424"
+					value={formData.email}
+					onChange={(e) =>
+						handleInputChange("contact", e.target.value)
 					}
 					className="bg-input border-border focus:ring-2 focus:ring-ring focus:border-transparent"
 					required
