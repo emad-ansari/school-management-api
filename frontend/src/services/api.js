@@ -1,6 +1,4 @@
-const API_BASE_URL = import.meta.env.API_BASE_URL;
-
-
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/';
 
 export const apiService = {
   // Add a new school
@@ -14,8 +12,11 @@ export const apiService = {
         body: JSON.stringify({
           name: schoolData.schoolName,
           address: schoolData.address,
-          latitude: parseFloat(schoolData.latitude),
-          longitude: parseFloat(schoolData.longitude),
+          city: schoolData.city,
+          state: schoolData.state,
+          contact: schoolData.contact,
+          pictureUrl: schoolData.pictureUrl,
+          email: schoolData.email,
         }),
       });
 
@@ -30,22 +31,19 @@ export const apiService = {
     }
   },
 
-  // Get schools by proximity
-  async getSchoolsByProximity(latitude, longitude) {
+  // Search schools
+  async searchSchools(query) {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}listSchools?latitude=${latitude}&longitude=${longitude}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}search?q=${encodeURIComponent(query)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch schools');
+        throw new Error(errorData.error || 'Failed to search schools');
       }
 
       return await response.json();
@@ -75,11 +73,10 @@ export const apiService = {
     }
   },
 
-
   // Test API connection
   async testConnection() {
     try {
-      const response = await fetch(`${API_BASE_URL}/`, {
+      const response = await fetch(`${API_BASE_URL}`, {
         method: 'GET',
       });
 

@@ -14,6 +14,7 @@ export const ShowSchoolsPage = () => {
 	const [schools, setSchools] = useState([]);
 	const [filteredSchools, setFilteredSchools] = useState([]);
 	const [loading, setLoading] = useState(true);
+	const [searchLoading, setSearchLoading] = useState(false);
 	const [error, setError] = useState(null);
 	const [searchQuery, setSearchQuery] = useState("");
 
@@ -22,24 +23,16 @@ export const ShowSchoolsPage = () => {
 	}, []);
 
 	useEffect(() => {
-		// Filter schools based on search query
-		if (searchQuery.trim() === "") {
-			setFilteredSchools(schools);
-		} else {
-			const filtered = schools.filter(school => {
-				const query = searchQuery.toLowerCase();
-				const name = (school.name || school.schoolName || "").toLowerCase();
-				const address = (school.address || "").toLowerCase();
-				const city = (school.city || "").toLowerCase();
-				const state = (school.state || "").toLowerCase();
-				
-				return name.includes(query) || 
-					   address.includes(query) || 
-					   city.includes(query) || 
-					   state.includes(query);
-			});
-			setFilteredSchools(filtered);
-		}
+		// Debounce search to avoid too many API calls
+		const timeoutId = setTimeout(() => {
+			if (searchQuery.trim() === "") {
+				setFilteredSchools(schools);
+			} else {
+				performSearch(searchQuery);
+			}
+		}, 500);
+
+		return () => clearTimeout(timeoutId);
 	}, [searchQuery, schools]);
 
 	const fetchSchools = async () => {
@@ -52,6 +45,37 @@ export const ShowSchoolsPage = () => {
 			setError(err.message || "Failed to fetch schools");
 		} finally {
 			setLoading(false);
+		}
+	};
+
+	const performSearch = async (query) => {
+		if (query.trim() === "") {
+			setFilteredSchools(schools);
+			return;
+		}
+
+		try {
+			setSearchLoading(true);
+			const data = await apiService.searchSchools(query);
+			setFilteredSchools(data.schools || []);
+		} catch (err) {
+			console.error('Search error:', err);
+			// Fallback to client-side filtering if search API fails
+			const filtered = schools.filter(school => {
+				const queryLower = query.toLowerCase();
+				const name = (school.name || school.schoolName || "").toLowerCase();
+				const address = (school.address || "").toLowerCase();
+				const city = (school.city || "").toLowerCase();
+				const state = (school.state || "").toLowerCase();
+				
+				return name.includes(queryLower) || 
+					   address.includes(queryLower) || 
+					   city.includes(queryLower) || 
+					   state.includes(queryLower);
+			});
+			setFilteredSchools(filtered);
+		} finally {
+			setSearchLoading(false);
 		}
 	};
 
@@ -117,6 +141,9 @@ export const ShowSchoolsPage = () => {
 							onChange={handleSearchChange}
 							className="pl-10 pr-4 py-3 text-base border-border focus:ring-2 focus:ring-ring focus:border-transparent"
 						/>
+						{searchLoading && (
+							<Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 animate-spin text-primary" />
+						)}
 					</div>
 					{searchQuery && (
 						<p className="text-sm text-muted-foreground mt-2 text-center">

@@ -718,6 +718,7 @@ export const citisOfState = {
     "Mirzapur",
     "Moradabad",
     "Muzaffarnagar",
+    "Noida",
     "Pilibhit",
     "Pratapgarh",
     "Prayagraj",

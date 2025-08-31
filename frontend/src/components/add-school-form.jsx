@@ -33,7 +33,6 @@ const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 const cloudinary_url = import.meta.env.VITE_CLOUDINARY_URL;
 
 
-
 export function AddSchoolForm() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [message, setMessage] = useState({ type: "", text: "" });
@@ -43,9 +42,11 @@ export function AddSchoolForm() {
 		state: "",
 		city: "",
 		email: "",
-		contact: "",
+		contact: null,
 		pictureUrl: null,
 	});
+
+	console.log('this is form Data: ', formData);
 
 	// Separate state for state and city dropdowns
 	const [stateOpen, setStateOpen] = useState(false);
@@ -119,7 +120,6 @@ export function AddSchoolForm() {
 		const newFormData = new FormData();
 		newFormData.append("file", file);
 		newFormData.append("upload_preset", uploadPreset);
-		setFormData(newFormData);
 
 		try {	
 			const uploadResponse = await fetch(cloudinary_url, {
@@ -319,11 +319,11 @@ export function AddSchoolForm() {
 				</Label>
 				<Input
 					id="contact"
-					type="text"
+					type="number"
 					placeholder="+91-393403424"
-					value={formData.email}
+					value={formData.contact}
 					onChange={(e) =>
-						handleInputChange("contact", e.target.value)
+						handleInputChange("contact", Number(e.target.value))
 					}
 					className="bg-input border-border focus:ring-2 focus:ring-ring focus:border-transparent"
 					required
