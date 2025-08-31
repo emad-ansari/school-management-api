@@ -1,4 +1,6 @@
-const API_BASE_URL = 'https://school-management-api-0dyr.onrender.com/';
+const API_BASE_URL = import.meta.env.API_BASE_URL;
+
+
 
 export const apiService = {
   // Add a new school
@@ -51,6 +53,28 @@ export const apiService = {
       throw error;
     }
   },
+
+  // Get all schools
+  async getAllSchools() {
+    try {
+      const response = await fetch(`${API_BASE_URL}getAllSchools`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch schools');
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    }
+  },
+
 
   // Test API connection
   async testConnection() {

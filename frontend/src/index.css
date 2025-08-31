@@ -121,3 +121,43 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Command Component Custom Styles */
+[data-slot="command"] {
+  @apply bg-popover text-popover-foreground;
+}
+
+[data-slot="command-input"] {
+  @apply text-foreground placeholder:text-muted-foreground;
+}
+
+[data-slot="command-item"] {
+  @apply text-foreground hover:bg-accent hover:text-accent-foreground transition-colors duration-150;
+}
+
+[data-slot="command-item"][data-selected="true"] {
+  @apply bg-accent text-accent-foreground;
+}
+
+[data-slot="command-empty"] {
+  @apply text-muted-foreground;
+}
+
+[data-slot="command-group-heading"] {
+  @apply text-muted-foreground font-medium;
+}
+
+/* Popover Custom Styles */
+[data-slot="popover-content"] {
+  @apply bg-popover text-popover-foreground border border-border shadow-lg;
+}
+
+/* Form Input Focus States */
+input:focus, textarea:focus {
+  @apply ring-2 ring-ring border-transparent;
+}
+
+/* Button Hover States */
+button:hover {
+  @apply transition-colors duration-150;
+}
